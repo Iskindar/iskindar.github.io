@@ -1,0 +1,371 @@
+
+ <!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Hexo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="John Doe">
+    
+    <meta name="description" content="论文完整题目：Unleashing Use-Before-Initialization Vulnerabilities in the Linux Kernel Using Targeted Stack Spraying这是一篇关于内核未初始化漏洞自动利用的论文，发表在NDSS2017上
+
+@[toc">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/iskindar.github.io/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/iskindar.github.io/img/pacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/iskindar.github.io/img/pacman.jpg">
+    
+    
+<link rel="stylesheet" href="/iskindar.github.io/css/style.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/iskindar.github.io/"><img src="/iskindar.github.io/img/logo.svg" alt="Hexo" title="Hexo"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/iskindar.github.io/" title="Hexo">Hexo</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:example.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing Use-Before-Initialization Vulnerabilities in the Linux Kernel Using Targeted Stack/" title="" itemprop="url"></a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://example.com" title="John Doe">John Doe</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+    Updated:<time datetime="2020-11-05T11:29:06.611Z" itemprop="dateModified">2020-11-05</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">简介：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E6%84%8F%E4%B9%89"><span class="toc-number">2.1.</span> <span class="toc-text">研究意义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%91%E6%88%98"><span class="toc-number">2.2.</span> <span class="toc-text">挑战</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Deterministic-Stack-Spraying"><span class="toc-number">3.1.</span> <span class="toc-text">Deterministic Stack Spraying</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Exhaustive-Memory-Spraying"><span class="toc-number">3.2.</span> <span class="toc-text">Exhaustive Memory Spraying</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">5.</span> <span class="toc-text">结果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%88%E5%96%B7%E5%B0%84%E7%9A%84%E8%A6%86%E7%9B%96%E7%8E%87"><span class="toc-number">5.1.</span> <span class="toc-text">栈喷射的覆盖率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A6%86%E7%9B%96%E7%8E%87%E5%88%86%E5%B8%83%E5%92%8C%E9%A2%91%E7%8E%87"><span class="toc-number">5.2.</span> <span class="toc-text">覆盖率分布和频率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%96%B7%E5%B0%84%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="toc-number">5.3.</span> <span class="toc-text">喷射的可靠性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%96%B7%E5%B0%84%E7%9A%84%E6%9C%89%E6%95%88%E6%80%A7"><span class="toc-number">5.4.</span> <span class="toc-text">喷射的有效性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%92%88%E5%AF%B9%E6%9C%AA%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BD%BF%E7%94%A8%E7%9A%84%E9%98%B2%E5%BE%A1"><span class="toc-number">6.</span> <span class="toc-text">针对未初始化使用的防御</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="toc-number">7.</span> <span class="toc-text">相关工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A8%E8%AE%BA"><span class="toc-number">8.</span> <span class="toc-text">讨论</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E5%88%A9%E7%94%A8%E6%80%A7"><span class="toc-number">8.1.</span> <span class="toc-text">可利用性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A7%BB%E6%A4%8D"><span class="toc-number">8.2.</span> <span class="toc-text">移植</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%98%B2%E5%BE%A1"><span class="toc-number">8.3.</span> <span class="toc-text">防御</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AA%E4%BA%BA%E6%83%B3%E6%B3%95"><span class="toc-number">9.</span> <span class="toc-text">个人想法</span></a></li></ol>
+		</div>
+		
+		<blockquote>
+<p>论文完整题目：Unleashing Use-Before-Initialization Vulnerabilities in the Linux Kernel Using Targeted Stack Spraying<br>这是一篇关于内核未初始化漏洞自动利用的论文，发表在NDSS2017上</p>
+</blockquote>
+<p>@[toc]</p>
+<h3 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h3><p>linux内核中常见的内存错误是使用未初始化变量。这种错误不仅会导致未定义的行为，而且当攻击者控制了未初始化的变量后也会导致很严重的安全隐患。然而，此前认为在内核栈中可靠地利用这个漏洞是不太可行的。但实际上如果攻击者先于触发漏洞的代码执行之前，在栈上放置一个可控的模式，是可以实现利用的。因此，这个未初始化使用漏洞被低估了，仅仅被当作是未定义行为，而不是安全漏洞。另外，完整的内存安全技术并没有考虑未初始化使用，甚至广泛使用的openSSL使用未初始化内存作为随机源。</p>
+<p>这篇文章提出了一个完整的自动化目标栈喷射方法来自动化利用内核的未初始化漏洞。目标栈喷射技术包含两点：</p>
+<ul>
+<li>确定的栈喷射技术，结合定制的符号执行和模糊测试来识别内核输入，这个内核输入指的是攻击者利用用户程序在确定地执行内核代码路径，从而在内核栈上留下攻击者控制的数据。</li>
+<li>内存喷射技术，使用内存占用和污染来可靠地控制内核栈上的一大块空间。</li>
+</ul>
+<p>所以这两个技术，一个是精准定位，一个是大面积覆盖。并且作者利用这个技术和未初始化漏洞可以实现提权。而相应的对策是提供了一种基于编译器的机制，来初始化可能不安全的指针类型，并且没有太多的额外性能。文章的结果显示，未初始化使用是一个很严重的攻击，所以未来的防御系统需要考虑这种漏洞，并且系统软件不应该使用未初始化内存来作为随机源。</p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><h4 id="研究意义"><a href="#研究意义" class="headerlink" title="研究意义"></a>研究意义</h4><p>在C或C++，由程序员来决定是否初始化一个变量一个确定的值。有些程序员认为反正这个变量后面也会赋值，在前一个CPU周期没必要做初始化操作。当这个操作每秒发生百万次的时候，这个观点是有意义的。然而手工追踪代码路径来找到合适的初始化漏洞是很容易出错的工作。并且自动检测未初始化漏洞不太准确，有两个原因：</p>
+<ul>
+<li>过程间的追踪会因为别名问题导致很高的误报和漏报。</li>
+<li>对于未初始化漏洞警告的处理的主观性很强。比如有的程序员喜欢解决每一个warning，而有的只要不会导致error，就不管警告了。</li>
+</ul>
+<p>如果未初始化数据用于确定控制流，那当一个未初始化函数指针被解引用时，程序或者内核的控制流就有可能被劫持。尽管这些漏洞存在潜在的风险，但是目前这个未初始化使用漏洞很少被认为是安全缺陷。比如openSSL显式地使用未初始化数据来加密，2015到2016年，linux有16个未初始化漏洞都打上补丁了，只有一个报告为CVE。并且先进的内存安全防御系统SoftBound+CETS都没有考虑这个漏洞。</p>
+<h4 id="挑战"><a href="#挑战" class="headerlink" title="挑战"></a>挑战</h4><p>大多数未初始化是在栈上还不是在堆上，在16个之前提到的未初始化漏洞，有11个是在栈上。相比于堆上的未初始化内存，栈上的更难以控制，有以下几点原因：</p>
+<ul>
+<li>栈内存的使用很频繁，且具有不可预知性。攻击者准备好的数据，有可能被其他数据所覆盖掉。</li>
+<li>栈对象的大小通常是小而固定的，这就导致控制栈是很困难的。</li>
+<li>栈的深度也是有严格检查的。</li>
+</ul>
+<p>为了解决这三个挑战，提出了三个要求：</p>
+<ul>
+<li>R1：需要知道栈里的未初始化变量的相对地址</li>
+<li>R2：R1处地址的内存需要可控，比如可以写任意值到这个内存</li>
+<li>R3：写到R2处的数据不能在被未初始化漏洞函数使用前覆盖掉。</li>
+</ul>
+<h3 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h3><p>利用未初始化漏洞的难点在于如何控制未初始化内存里的数据。通过在目标内存放置恶意指针，一个未初始化指针的解引用就可以转换为任意内存读写或者任意代码执行。栈喷射利用的难点有这么几个：</p>
+<ul>
+<li>栈对象大小的限制和静态性</li>
+<li>栈使用检查</li>
+<li>栈大小的限制</li>
+</ul>
+<p>选择未初始化内存的位置的要求：</p>
+<ul>
+<li>找到一条漏洞执行路径，来准备覆盖数据</li>
+<li>让内核分配准备好的数据到指定的内存页</li>
+</ul>
+<p>第一个是确定的，只要找到一条路径和触发的输入，我们就可以写任意数据到指定的位置。第二个就要耗尽内存来影响栈的分配。但由于一个执行内核函数的进程的创建会用到内核栈，就会导致一部分准备的数据会被覆盖掉。所以，无法控制栈的高地址部分。文章的主要方法主要分为Deterministic Stack Spraying和Exhaustive Memory Spraying这两个部分，分别对应上面两点。</p>
+<h4 id="Deterministic-Stack-Spraying"><a href="#Deterministic-Stack-Spraying" class="headerlink" title="Deterministic Stack Spraying"></a>Deterministic Stack Spraying</h4><p>这个步骤主要是找到一条执行路径来用准备好的数据覆盖未初始化的变量。难点在于如何找打一个特定参数的系统调用，来触发覆盖执行路径。整体架构如下图所示，包含三个组件：符号执行引擎，模糊测试，连接二者的协调器。符号执行的目的是发现尽可能多的路径来保存用户数据到栈上，从而覆盖掉未初始化变量。但是符号执行有路径爆炸的问题，文章通过确定循环条件，来用fuzzer选择性地探索这些循环。为了验证一个系统调用是否保存了任意数据到栈上，fuzzer用magic code覆盖了非控制参数（不会对执行路径造成影响），这样当系统调用返回时，使用kprobes来拦截执行，并且扫描内核栈，看看哪些范围的栈内存被magic code污染了。<br><img src="https://img-blog.csdnimg.cn/20200718213233203.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>在方法部分，文章中针对一些设计选择做了讨论，符号执行部分包括测试样例的自动生成，路径探索，循环识别。模糊测试包括喷射验证，模糊测试循环。协调器部分对通信机制和控制机制做了说明。</p>
+<h4 id="Exhaustive-Memory-Spraying"><a href="#Exhaustive-Memory-Spraying" class="headerlink" title="Exhaustive Memory Spraying"></a>Exhaustive Memory Spraying</h4><p>这个技术主要是用来影响栈的分配，从而让栈使用的内存页被准备好的数据所覆盖。难点在于如何提高覆盖的可靠性。这里，作者提出了Exhaustive Memory Spraying方法。具体来说，包括两步：</p>
+<ul>
+<li>占用目标机器里大多数的内存</li>
+<li>用恶意数据污染所有剩下可用的内存</li>
+</ul>
+<p>内存占用使得内核只能使用剩下的少量内存。由于剩下的内存比较小，污染操作可以快速高效的完成。一旦我们确定了所有可用内存被恶意数据污染，新分配的栈上的内存就有了恶意数据。由于是在内核空间，内核不会清理已分配的内存页面，所以恶意数据不会被清理。</p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>文章的实现主要是基于linux内核的实现，要移植到其他内核也是可能的，因为只需要提供系统调用接口，而且可以直接工作在二进制上。符号执行引擎使用的是S2E，模糊测试工具用的是Trinity Fuzzer。</p>
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><p>文章对实现的工具，从以下几个维度进行了评估：</p>
+<ul>
+<li>栈喷射的覆盖率：基于两种喷射技术，我们能控制的内核栈的范围有多大？</li>
+<li>覆盖率分布和频率：在确定的栈喷射技术中，可控的内存在内核中是如何分布的？我们能够多少次控制一个特定的栈区域？</li>
+<li>喷射的可靠性：大范围内存喷射中，控制内存的可靠性有多高？</li>
+<li>喷射的有效性：使用喷射技术获取内存的控制花了多久？</li>
+</ul>
+<h4 id="栈喷射的覆盖率"><a href="#栈喷射的覆盖率" class="headerlink" title="栈喷射的覆盖率"></a>栈喷射的覆盖率</h4><p>在229个系统调用中有34个是不能控制栈内存区域的。这是因为这些系统调用没有要存在栈上的参数。表1显示了控制字节数top10的系统调用。结果表明，精准栈喷射技术在1kb内核栈内存区域，能够覆盖315字节。因此，约32%的内核栈区域可以用这个技术来操作内存。</p>
+<p><img src="https://img-blog.csdnimg.cn/20200718213242795.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>Exhaustive Memory Spraying这个技术的覆盖率可以达到90%，如下图所示，只有一部分离栈基址比较近的1700字节无法控制。<br><img src="https://img-blog.csdnimg.cn/2020071821325379.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>这两种技术是互补的技术，exhaustive可以控制内存的大部分区域，但不能控制最常用的栈区域。Deterministic这个可以控制32%左右的的栈区域。总体来说，可以控制超过91%的内核栈区域。</p>
+<h4 id="覆盖率分布和频率"><a href="#覆盖率分布和频率" class="headerlink" title="覆盖率分布和频率"></a>覆盖率分布和频率</h4><p>这部分的结果主要是针对Deterministic Stack Spraying技术来进行评估的。文章进一步分析控制的覆盖率在内核堆栈的分布。如下图所示，主要覆盖在200到800字节之间。另外一些区域可以被超过100个系统调用控制。我们相信这些区域最有可能被栈对象使用，并且未初始化变量很有可能在这些区域。</p>
+<p><img src="https://img-blog.csdnimg.cn/20200718213309318.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>另外，作者的另外一个结果还显示只有80个字节是被唯一的系统调用控制的。其他的字节都可以被多个系统调用控制，因此其他的字节处的喷射稳定性更好。</p>
+<h4 id="喷射的可靠性"><a href="#喷射的可靠性" class="headerlink" title="喷射的可靠性"></a>喷射的可靠性</h4><p>这部分的结果是针对Exhaustive Stack Spraying来评估的。主要是通过测量内核使用内核栈上喷射内存的可能性来评估Exhaustive Stack Spraying技术的可靠性。首先，开启Exhaustive Stack Spraying，然后运行fuzzer来唤醒系统调用，接着计算系统调用（内核栈上被污染的系统调用）唤起的次数。结果表明大部分情况下，内核使用喷射内存作为栈在第一次或第二次，平均为1.8，最差的也小于10次。这些结果说明这个技术是有效的，可以可靠地控制未初始化内存。</p>
+<h4 id="喷射的有效性"><a href="#喷射的有效性" class="headerlink" title="喷射的有效性"></a>喷射的有效性</h4><p>符号执行和模糊测试都是很耗时的，多数情况他们不会自动终止，作者设置了一个时间，为30分钟，如果超过30分钟，覆盖率没有变化的，就终止当前的分析，去分析下一个。结果发现有12个系统调用没有按时完成。基于这个结果，工具可以在几分钟来控制超过200字节的最频繁使用的栈内存区域。另外，占用512MB的内存也仅需要2s。</p>
+<h3 id="针对未初始化使用的防御"><a href="#针对未初始化使用的防御" class="headerlink" title="针对未初始化使用的防御"></a>针对未初始化使用的防御</h3><p>核心是将未初始化的变量初始化为0。另外，还针对linux内核代码实现了过程内的分析来分析不安全的指针，在LLVM框架下使用插桩来实现初始化0的操作。</p>
+<h3 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h3><p>关于相关工作主要提到了内存喷射，内核利用和自动化利用，未初始化利用，未初始化使用检测和预防，内存安全技术这五个方面。由于个人兴趣，着重看第二部分。这里提到了几个工具，FuzzBomb，Driller。FuzzBomb结合静态分析，符号执行和模糊测试来检测程序中的漏洞。符号执行和模糊测试同样被用在Driller中。</p>
+<p>（因为是2017年的文章，感觉漏洞自动化利用的文章在18，19年特别多，基本上也是结合符号执行和模糊测试来做的。）</p>
+<h3 id="讨论"><a href="#讨论" class="headerlink" title="讨论"></a>讨论</h3><h4 id="可利用性"><a href="#可利用性" class="headerlink" title="可利用性"></a>可利用性</h4><p>未初始化使用漏洞不一定是可利用的，它是基于一个很强的前提条件：触发漏洞的执行路径不能覆盖掉准备好的数据。否则，目标栈喷射技术会失去对未初始化内存的控制。另外，工具没有考虑一种情况：准备恶意数据的系统调用同时也触发了漏洞。</p>
+<h4 id="移植"><a href="#移植" class="headerlink" title="移植"></a>移植</h4><p>移植到别的程序的话，需要</p>
+<ul>
+<li>定义好接口，比如JavaScript的接口</li>
+<li>目标符号执行引擎，比如Kudzu</li>
+<li>模糊测试工具，比如jsfunfuzz</li>
+</ul>
+<p>当有了这些工具后，deterministic stack spraying就很容易支持别的程序。</p>
+<h4 id="防御"><a href="#防御" class="headerlink" title="防御"></a>防御</h4><p>之前提到了防御方法是初始化0这个操作。这种防御方式对大部分情况都很受用，但是如果一个指针是被一个未初始化非指针值修改，初始化0这个操作就不能防止漏洞被利用。因为导致问题的指针仍然可以被攻击者通过控制另外一个值来控制。因此，也得对这些非指针的值进行初始化0。目前有两种针对未初始化使用漏洞的防御方法，分别是PaX STACKLEAK和split kernel，但这两种方法的运行开销很大。</p>
+<p>文章认为复杂的过程间分析和域敏感分析用来过滤安全的内存分配是很有必要的，并将其作为未来的研究工作。</p>
+<p>另外一个防御方向是针对目标栈喷射。比如，可以随机调整栈基址，导致准备的数据不能覆盖到未初始化变量。由于内核栈空间很小，对这种随机化进行加密受限还是比较大的。为了检测exhaustive stack spray ，可以通过监控是否有大量进程创建或者大量内存分配。然而这种技术可以以多花点时间为代价，减少进程的数目和内存分配的大小。</p>
+<h3 id="个人想法"><a href="#个人想法" class="headerlink" title="个人想法"></a>个人想法</h3><p>总的来说，这篇文章的角度是比较少见。之前搜过未初始化漏洞的CVE，确实比较少。但文章中也提到，现在不怎么重视这种漏洞，更多是当成一个未定义的行为。整体框架也很清晰。就是deterministic stack spraying和exhaustive stack spraying。暂时没有关于该工具开源的信息。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://example.com/2020/11/05/%E3%80%90%E8%AE%BA%E6%96%87%E5%88%86%E4%BA%AB%E3%80%91Unleashing%20Use-Before-Initialization%20Vulnerabilities%20in%20the%20Linux%20Kernel%20Using%20Targeted%20Stack/" data-title="Hexo" data-tsina="" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing MAYHEM on Binary Code/" title="">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  (no title)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/iskindar.github.io/2020/11/05/论文阅读：KOOBE_ Towards Facilitating Exploit Generation of Kernel Out-Of-Bounds Write Vulnerabilities/"  title="">
+ <strong>NEXT:</strong><br/> 
+ <span>(no title)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">简介：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E6%84%8F%E4%B9%89"><span class="toc-number">2.1.</span> <span class="toc-text">研究意义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%91%E6%88%98"><span class="toc-number">2.2.</span> <span class="toc-text">挑战</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Deterministic-Stack-Spraying"><span class="toc-number">3.1.</span> <span class="toc-text">Deterministic Stack Spraying</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Exhaustive-Memory-Spraying"><span class="toc-number">3.2.</span> <span class="toc-text">Exhaustive Memory Spraying</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">5.</span> <span class="toc-text">结果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%88%E5%96%B7%E5%B0%84%E7%9A%84%E8%A6%86%E7%9B%96%E7%8E%87"><span class="toc-number">5.1.</span> <span class="toc-text">栈喷射的覆盖率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A6%86%E7%9B%96%E7%8E%87%E5%88%86%E5%B8%83%E5%92%8C%E9%A2%91%E7%8E%87"><span class="toc-number">5.2.</span> <span class="toc-text">覆盖率分布和频率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%96%B7%E5%B0%84%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="toc-number">5.3.</span> <span class="toc-text">喷射的可靠性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%96%B7%E5%B0%84%E7%9A%84%E6%9C%89%E6%95%88%E6%80%A7"><span class="toc-number">5.4.</span> <span class="toc-text">喷射的有效性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%92%88%E5%AF%B9%E6%9C%AA%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BD%BF%E7%94%A8%E7%9A%84%E9%98%B2%E5%BE%A1"><span class="toc-number">6.</span> <span class="toc-text">针对未初始化使用的防御</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="toc-number">7.</span> <span class="toc-text">相关工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A8%E8%AE%BA"><span class="toc-number">8.</span> <span class="toc-text">讨论</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E5%88%A9%E7%94%A8%E6%80%A7"><span class="toc-number">8.1.</span> <span class="toc-text">可利用性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A7%BB%E6%A4%8D"><span class="toc-number">8.2.</span> <span class="toc-text">移植</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%98%B2%E5%BE%A1"><span class="toc-number">8.3.</span> <span class="toc-text">防御</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AA%E4%BA%BA%E6%83%B3%E6%B3%95"><span class="toc-number">9.</span> <span class="toc-text">个人想法</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2020 
+		
+		<a href="http://example.com" target="_blank" title="John Doe">John Doe</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/iskindar.github.io/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

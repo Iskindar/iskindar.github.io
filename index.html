@@ -64,15 +64,118 @@
 
   <section class="post" itemscope itemprop="blogPost">
   
-    <a href="/iskindar.github.io/2020/11/05/hello-world/" title="Hello World" itemprop="url">
+    <a href="/iskindar.github.io/2020/11/05/CollAFL_ Path Sensitive Fuzzing 论文笔记/" title="" itemprop="url">
   
-    <h1 itemprop="name">Hello World</h1>
+    <h1 itemprop="name"></h1>
     
      
-           <p itemprop="description" >Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the </p>
+           <p itemprop="description" >@[toc]
+大纲Background
+准确的覆盖率信息可以提高发现漏洞的概率，但同时会带来极大的开销。
+
+实验表明超过75%的边会与其他边碰撞在同一个应用中。（AFL存在哈希碰撞问题）
+
+极少模糊测试工具利用代码覆盖率信息来直接模糊测试未探索过的路
+
+由于AFL的成功，覆盖率不</p>
         
     
-    <time datetime="2020-11-05T10:44:40.931Z" itemprop="datePublished">2020-11-05</time>
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/iskindar.github.io/2020/11/05/【论文分享】Automatic Generation of Data-Oriented Exploits/" title="" itemprop="url">
+  
+    <h1 itemprop="name"></h1>
+    
+     
+           <p itemprop="description" >论文题目：Automatic Generation of Data-Oriented Exploits这篇论文来自于Usenix 2015
+
+@[toc]
+简介：由于针对控制流劫持的防御机制在广泛应用，控制流导向的漏洞利用变得更加复杂了。一个备选方案是，针对非控制数据进行攻击，就</p>
+        
+    
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/iskindar.github.io/2020/11/05/【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code/" title="" itemprop="url">
+  
+    <h1 itemprop="name"></h1>
+    
+     
+           <p itemprop="description" >今天分享的Usenix 2020的Sys: a Static/Symbolic Tool for Finding Good Bugs in Good (Browser) Code这篇论文。这篇论文的作者也是KLEE这个很牛逼工具的作者。目前该论文的工具已开源在github上：ht</p>
+        
+    
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing MAYHEM on Binary Code/" title="" itemprop="url">
+  
+    <h1 itemprop="name"></h1>
+    
+     
+           <p itemprop="description" >论文题目：Unleashing MAYHEM on Binary Code
+
+@[toc]
+简介：提出了mayhem系统，能够自动化地在二进制程序中找到可利用的漏洞。mayhem报告出的漏洞都会附带一个获取shell的exp。Mayhem工作在二进制程序上，而不需要debug信息</p>
+        
+    
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing Use-Before-Initialization Vulnerabilities in the Linux Kernel Using Targeted Stack/" title="" itemprop="url">
+  
+    <h1 itemprop="name"></h1>
+    
+     
+           <p itemprop="description" >论文完整题目：Unleashing Use-Before-Initialization Vulnerabilities in the Linux Kernel Using Targeted Stack Spraying这是一篇关于内核未初始化漏洞自动利用的论文，发表在NDSS20</p>
+        
+    
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/iskindar.github.io/2020/11/05/论文阅读：KOOBE_ Towards Facilitating Exploit Generation of Kernel Out-Of-Bounds Write Vulnerabilities/" title="" itemprop="url">
+  
+    <h1 itemprop="name"></h1>
+    
+     
+           <p itemprop="description" >Usenix Security 2020 的一篇关于内核OOB漏洞自动化利用的文章，感觉写的不错。
+
+@[toc]
+简介这篇文章的主要目的是为了评估堆溢出漏洞的可利用性，从而方便开发人员判断漏洞修补的价值。文章提出了KOOBE，一个基于漏洞能力来实现内核堆溢出漏洞的自动化利用的工</p>
+        
+    
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+  </a>
+</section>
+
+  <section class="post" itemscope itemprop="blogPost">
+  
+    <a href="/iskindar.github.io/2020/11/05/论文阅读：SKEE_ A Lightweight Secure Kernel-level Execution Environment for ARM/" title="" itemprop="url">
+  
+    <h1 itemprop="name"></h1>
+    
+     
+           <p itemprop="description" >这是一篇NDSS2014的论文，实际上就是一种隔离机制的实现。感觉和同年SP会议上的CPI的论文的思想有些相似。
+
+简介​        现有的工作针对内核监控和保护主要依赖于高特权的系统组件来隔离安全工具，以防潜在的内核攻击。但是这种方法增加了维护工作和权限系统组件的代码库大小</p>
+        
+    
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
   </a>
 </section>
 

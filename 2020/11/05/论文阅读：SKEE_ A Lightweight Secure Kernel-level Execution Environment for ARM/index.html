@@ -1,0 +1,353 @@
+
+ <!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Hexo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="John Doe">
+    
+    <meta name="description" content="这是一篇NDSS2014的论文，实际上就是一种隔离机制的实现。感觉和同年SP会议上的CPI的论文的思想有些相似。
+
+简介​        现有的工作针对内核监控和保护主要依赖于高特权的系统组件来隔离安全工具，以防潜在的内核攻击。但是这种方法增加了维护工作和权限系统组件的代码库大小，反而增加了安全漏洞">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/iskindar.github.io/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/iskindar.github.io/img/pacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/iskindar.github.io/img/pacman.jpg">
+    
+    
+<link rel="stylesheet" href="/iskindar.github.io/css/style.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/iskindar.github.io/"><img src="/iskindar.github.io/img/logo.svg" alt="Hexo" title="Hexo"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/iskindar.github.io/" title="Hexo">Hexo</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:example.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/iskindar.github.io/2020/11/05/论文阅读：SKEE_ A Lightweight Secure Kernel-level Execution Environment for ARM/" title="" itemprop="url"></a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://example.com" title="John Doe">John Doe</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+    Updated:<time datetime="2020-11-05T11:27:26.077Z" itemprop="dateModified">2020-11-05</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E5%8A%A8%E6%9C%BA"><span class="toc-number">2.</span> <span class="toc-text">研究动机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF"><span class="toc-number">2.0.1.</span> <span class="toc-text">研究背景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E9%97%AE%E9%A2%98"><span class="toc-number">2.0.2.</span> <span class="toc-text">研究问题</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">研究方案</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E5%81%87%E8%AE%BE"><span class="toc-number">3.0.1.</span> <span class="toc-text">安全假设</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="toc-number">3.0.2.</span> <span class="toc-text">系统架构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF"><span class="toc-number">3.0.3.</span> <span class="toc-text">关键技术</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#SKEE%E9%9A%94%E7%A6%BB"><span class="toc-number">3.0.3.1.</span> <span class="toc-text">SKEE隔离</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E5%88%87%E6%8D%A2"><span class="toc-number">3.0.3.2.</span> <span class="toc-text">安全切换</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E5%92%8C%E4%BF%9D%E6%8A%A4"><span class="toc-number">3.0.3.3.</span> <span class="toc-text">监控和保护</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E8%AF%84%E4%BC%B0"><span class="toc-number">4.</span> <span class="toc-text">测试评估</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E7%B3%BB%E7%BB%9F%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%BC%80%E9%94%80"><span class="toc-number">4.0.1.</span> <span class="toc-text">模拟系统事件的开销</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B7%E6%9C%AC%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B%E7%9A%84%E9%A2%9D%E5%A4%96%E5%BC%80%E9%94%80"><span class="toc-number">4.0.2.</span> <span class="toc-text">样本安全检测的额外开销</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+		</div>
+		
+		<blockquote>
+<p>这是一篇NDSS2014的论文，实际上就是一种隔离机制的实现。感觉和同年SP会议上的CPI的论文的思想有些相似。</p>
+</blockquote>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>​        现有的工作针对内核监控和保护主要依赖于高特权的系统组件来隔离安全工具，以防潜在的内核攻击。但是这种方法增加了维护工作和权限系统组件的代码库大小，反而增加了安全漏洞的风险。这篇文章针对这个问题，提出了一个ARM上的轻量级的安全内核执行环境。这个工具的研究思路主要从隔离、安全上下文切换、监控和保护内核这三点来展开。SKEE产生的额外开销也相对较低，表明可以实际应用到ARM平台上去。</p>
+<h2 id="研究动机"><a href="#研究动机" class="headerlink" title="研究动机"></a>研究动机</h2><h4 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h4><p>​        大多数操作系统依赖内核来实现在内存上的安全访问控制。而内存上存放着这些内核的代码，因此，整个系统的安全性依赖于一个巨大的可信计算基（TCB）。这个TCB包含基本的内核代码以及可能存在漏洞的设备驱动。而且，大量现实中的事件表明，针对内核的攻击是真实的威胁。</p>
+<h4 id="研究问题"><a href="#研究问题" class="headerlink" title="研究问题"></a>研究问题</h4><p>目前研究存在的问题：</p>
+<ul>
+<li>内核监控和保护工作存在问题：现有的方法使用hypervisor或者沙箱机制，实际上是把安全工具交给一个比内核更高级别的系统构件中去。但由于安全工具本身的代码量大和潜在的软件漏洞，反倒会系统引入了风险。</li>
+<li>ARM被广泛使用在移动设备上，但是缺乏合适的技术来为ARM提供隔离机制</li>
+</ul>
+<p>​        因此，需要有一个ARM上的安全环境来对内核进行监控和保护，并且这个工具需要与内核隔离，以内核漏洞影响到安全工具。</p>
+<h2 id="研究方案"><a href="#研究方案" class="headerlink" title="研究方案"></a>研究方案</h2><h4 id="安全假设"><a href="#安全假设" class="headerlink" title="安全假设"></a>安全假设</h4><p>SKEE主要考虑针对以下这三种威胁，做出防御。</p>
+<ul>
+<li>修改或重定位内核可执行文件</li>
+<li>利用内核漏洞修改内核数据或者劫持控制流，来实现恶意行为</li>
+<li>攻击SKEE隔离环境</li>
+</ul>
+<p>SKEE提供了两种安全保护。</p>
+<ul>
+<li>防止内核修改内存布局或者访问系统权限。</li>
+<li>确保从一个陷入危险的内核切换到隔离环境会经过一个严格的切换门控制</li>
+</ul>
+<p>SKEE基于以下假设来构建。</p>
+<p>​        SKEE假设所有的系统都能安全加载。也就是说，隔离环境在boot 启动时是安全的。这个过程直接使用secure boot来实现。实际上，secure boot只能保证系统启动时安全，但不能确保系统运行时安全。</p>
+<p>​        假设所有的内核都有数据执行保护机制。同时假设ARM硬件平台实现了Privileged eXecute Never（PXN）机制。</p>
+<p>​        对于32-bit ARMv7 架构，SKEE要求内核只使用TTBR0来映射操作系统的内存，而TTBR1则由SKEE来使用。虚拟地址的空间的低2GB是用户态代码。这两个要求不影响操作系统的功能，并且这两个要求都是Linux的默认设置。</p>
+<p>​        对于64-bit ARMv8架构，SKEE要求使用一页物理地址为0x0的内存空间。这个要求也很容易通过虚拟化来满足。</p>
+<h4 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h4><p>​        SKEE的基本思想是创建一个自我保护的虚拟地址空间来支撑一个隔离执行环境。SKEE修改了security boot，从而使得security boot为内核和SKEE创建两个分离的地址空间，如下图所示。SKEE保证安全的关键设计有三个：</p>
+<ul>
+<li>隔离</li>
+<li>安全切换</li>
+<li>监控和保护内核</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20200624151246892.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="关键技术"><a href="#关键技术" class="headerlink" title="关键技术"></a>关键技术</h4><h5 id="SKEE隔离"><a href="#SKEE隔离" class="headerlink" title="SKEE隔离"></a>SKEE隔离</h5><p>SKEE在防止内核访问物理内存上使用了两个步骤。首先是创建一个保护的地址空间，接着限制内核访问MMU。</p>
+<p>（1）创建一个保护的地址空间。</p>
+<p>文章给出了下图，一个ARMv7的地址空间隔离的示意图。受控于内存转换表的内核地址空间将使用插桩来实施以下三点来防止内核修改自己的代码或者访问SKEE的内存空间。</p>
+<ul>
+<li>移除所有指向SKEE环境或者内核内存转换表的入口。即，拆桥。</li>
+<li>将内核代码和SKEE转换门映射为只读。即，可远观而不可亵玩。</li>
+<li>限制所有其他的内存区域（内核数据和用户态内存）使用PXN bit位来执行特权代码。即，不许百姓放火。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20200624151258706.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>（2）限制内核访问MMU</p>
+<p>​        为了防止内核破坏地址空间隔离，只允许使用插桩后的内存转换表。SKEE通过限制内核修改MMU寄存器来实现这点。另外，内核也不能修改转换表的基寄存器。SKEE从内核代码中移除了控制指令，并用跳转到转换门的hook来替代。从内核的二进制代码中识别特定的指令是很容易的，因为ARM使用定长指令集。借鉴TZRKP和SPROPES的技术，内核不能执行未经过SKEE模拟的特权指令。同时，SKEE还考虑了可加载内核模块（LKM）对系统内存映射的影响。对于LKM，其必须通过SKEE加载，从而让SKEE确保LKM的代码没有包含从内核模块移除的特权指令。</p>
+<h5 id="安全切换"><a href="#安全切换" class="headerlink" title="安全切换"></a>安全切换</h5><p>​        SKEE切换安全环境是通过一个特殊的转换门来实现的。这个转换门需要满足原子性、确定性和独有性才能保证两个环境的隔离。</p>
+<p>（1）原子性</p>
+<p>​        原子性指的是切换环境的操作是不可分割的。也就是说这个动作要么成功，要么失败。在内核进入切换门前是不能访问SKEE的空间。切换门首先会暴露SKEE的地址，然后跳转到SKEE。由于内核和SKEE运行在同一特权级，也就没有办法一条指令实现切换，比如通过单点入口或者硬件控制。SKEE只能试图去控制一连串的指令不会对内核暴露其地址空间。这可能也是攻击者可以攻击的一个点，比如扰乱门的指令执行顺序或者跳到一连串指令的中间。SKEE考虑到这种情况了。</p>
+<p>（2）确定性</p>
+<p>​        确定性指的是切换门的指令执行顺序是确定的。虽然内核可以访问到切换门，但是切换门不会相信内核的任何系统状态或任何输入。因此，这样就确保了每次切换指令的执行顺序都是一样的，确定的。</p>
+<p>（3）独有性</p>
+<p>​        独有性指的是访问切换函数是独有的。切换门是通往SKEE的唯一路径。对于32位ARMv7来说，要在两个不同的地址空间切换，相应的转换表的基寄存器也必须相应地更新。这个更新操作只能通过MCR指令来做。如果切换门暴露了一个MCR指令的实例，那么一个被攻破的内核就可能违反隔离机制。只要通过创建一个恶意页表集合，加载这些页表的基地址到指定的寄存器，然后跳转到MCR指令去拥有一个不受限制的地址空间。为了解决这个问题，切换门不能包含任何跟新TTBR0或者TTBR1的指令。文章提出了一种解决方法：任何非0值加载到TTBCR.N就会导致相同的系统状态。这样，切换动作就是确定的。</p>
+<p>​        对于64位ARMv8来说，TTBR0和TTBR1用来映射不同的虚拟地址。限制OS使用一个转化表基寄存器，然后把另外一个留给SKEE，需要对OS做改动。这样就影响SKEE的兼容性。为了解决这个问题，SKEE与内核共享TTBR1。因此，在两个地址空间切换就需要修改TTBR1的值。这也可以通过MCR指令来实现。但是，这也就无法确保切换的确定性。因此，切换门使用一个特殊的MSR编码来保证TTBR1的确定变化。</p>
+<p>​        另外，作者还使用了ASID技术来加速切换上下文环境。</p>
+<h5 id="监控和保护"><a href="#监控和保护" class="headerlink" title="监控和保护"></a>监控和保护</h5><p>​        为了高效监控和保护内核，SKEE提供了安全工具能够做到以下三点。</p>
+<ul>
+<li>陷入内核核心事件的能力</li>
+<li>访问内核内存的能力</li>
+<li>控制内核内存保护的能力</li>
+</ul>
+<p>​         SKEE控制内核的虚拟地址空间允许其修改内存区域的访问权限来强制内核陷入某些操作。之前也提到过，SKEE用钩子来取代了内核特权指令。这些钩子可以放置于内核重要操作的执行路径上，比如系统调用句柄等等。总的来说，SKEE拥有的特权和基于虚拟化的方式是相似的。SKEE的优势在于不增加可信计算基的代码量，而且可以运行在ARMv7这种不支持虚拟化扩展的方式的系统上。</p>
+<h2 id="测试评估"><a href="#测试评估" class="headerlink" title="测试评估"></a>测试评估</h2><p>​        这篇文章主要实现了两个平台上的SKEE，一个是32-bit ARMv7，测试于三星Note 4，另一个是64-bit ARMv8，测试于三星Galaxy S6上。</p>
+<p>​        作者对SKEE的评估，主要包含模拟系统事件的开销，样本安全检测的额外开销。</p>
+<h4 id="模拟系统事件的开销"><a href="#模拟系统事件的开销" class="headerlink" title="模拟系统事件的开销"></a>模拟系统事件的开销</h4><p>​        首先作者测量了在SKEE内运行安全工具的开销和不在SKEE保护下，运行安全工具的开销。实际上由于SKEE运行在内核旁边的一个平行世界，在环境内或是环境外的运行的影响是一样的。因此，唯一的开销就是在环境相互切换上的开销。在使用TLB无效化的时候，ARMv7和ARMv8的开销是相差不多的，使用了ASID技术后，ARMv8的开销大大降低。不降低的结果其实也可以接受。</p>
+<p>​        另外，作者使用了多个benchmark 工具进行了性能评估。不论是v7还是v8系统，性能开销最高不超过17%，大部分都在10%以下。可见，这个SKEE的性能开销可以让人接受。</p>
+<p>​        此外，作者还测量了加载APP的性能开销，这里选择的app都是手游，需要很长的加载时间。大部分APP的性能额外开销都在10%以下。可见这个SKEE效果还是不错的。</p>
+<p>​        最后，作者还测量了启动的额外开销。这个实验中，SKEE的表现很差，因为启动过程中涉及到了大量的内存分配操作。但实际上，这方面的开销大在实际应用中的影响也稍微小一些。</p>
+<h4 id="样本安全检测的额外开销"><a href="#样本安全检测的额外开销" class="headerlink" title="样本安全检测的额外开销"></a>样本安全检测的额外开销</h4><p>​        第二组实验中，作者加了安全检查来保证模拟事件不会突破隔离机制。这个实验的目的是测量在SKEE上运行安全框架的额外开销。实验结果随测试集变化很大。但是总体来说都低于10%的开销，所以结果可以接受。另外，在启动方面，有安全框架下的SKEE额外开销也比较小。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​        这篇文章的主要难点还是在于两个环境的切换过程，作者围绕这个切换做了很多相关工作。文章中也提到切换操作并不是原子操作，攻击者可能有办法利用这点来实现攻击。不过难度应该还是挺大的。</p>
+<p>​        文章的思路实际上和基于hypervisor的方式有点像，但有区别在于一个是纵向的，一个是横向的。这里的横纵向是从内核的权限级别来看。这也启发我们想别的问题，可能也可以采取这样的思路。</p>
+<p>​        </p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://example.com/2020/11/05/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%EF%BC%9ASKEE_%20A%20Lightweight%20Secure%20Kernel-level%20Execution%20Environment%20for%20ARM/" data-title="Hexo" data-tsina="" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/iskindar.github.io/2020/11/05/论文阅读：KOOBE_ Towards Facilitating Exploit Generation of Kernel Out-Of-Bounds Write Vulnerabilities/" title="">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  (no title)</span>
+</a>
+</div>
+
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E5%8A%A8%E6%9C%BA"><span class="toc-number">2.</span> <span class="toc-text">研究动机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF"><span class="toc-number">2.0.1.</span> <span class="toc-text">研究背景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E9%97%AE%E9%A2%98"><span class="toc-number">2.0.2.</span> <span class="toc-text">研究问题</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">研究方案</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E5%81%87%E8%AE%BE"><span class="toc-number">3.0.1.</span> <span class="toc-text">安全假设</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="toc-number">3.0.2.</span> <span class="toc-text">系统架构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF"><span class="toc-number">3.0.3.</span> <span class="toc-text">关键技术</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#SKEE%E9%9A%94%E7%A6%BB"><span class="toc-number">3.0.3.1.</span> <span class="toc-text">SKEE隔离</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E5%88%87%E6%8D%A2"><span class="toc-number">3.0.3.2.</span> <span class="toc-text">安全切换</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E5%92%8C%E4%BF%9D%E6%8A%A4"><span class="toc-number">3.0.3.3.</span> <span class="toc-text">监控和保护</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E8%AF%84%E4%BC%B0"><span class="toc-number">4.</span> <span class="toc-text">测试评估</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E7%B3%BB%E7%BB%9F%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%BC%80%E9%94%80"><span class="toc-number">4.0.1.</span> <span class="toc-text">模拟系统事件的开销</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B7%E6%9C%AC%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B%E7%9A%84%E9%A2%9D%E5%A4%96%E5%BC%80%E9%94%80"><span class="toc-number">4.0.2.</span> <span class="toc-text">样本安全检测的额外开销</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2020 
+		
+		<a href="http://example.com" target="_blank" title="John Doe">John Doe</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/iskindar.github.io/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,351 @@
+
+ <!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Hexo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="John Doe">
+    
+    <meta name="description" content="今天分享的Usenix 2020的Sys: a Static/Symbolic Tool for Finding Good Bugs in Good (Browser) Code这篇论文。这篇论文的作者也是KLEE这个很牛逼工具的作者。目前该论文的工具已开源在github上：https://gith">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/iskindar.github.io/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/iskindar.github.io/img/pacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/iskindar.github.io/img/pacman.jpg">
+    
+    
+<link rel="stylesheet" href="/iskindar.github.io/css/style.css">
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/iskindar.github.io/"><img src="/iskindar.github.io/img/logo.svg" alt="Hexo" title="Hexo"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/iskindar.github.io/" title="Hexo">Hexo</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:example.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/iskindar.github.io/2020/11/05/【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code/" title="" itemprop="url"></a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://example.com" title="John Doe">John Doe</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
+    Updated:<time datetime="2020-11-05T11:29:52.573Z" itemprop="dateModified">2020-11-05</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">核心方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%A8sys%E5%8E%BB%E6%89%BEbug"><span class="toc-number">3.</span> <span class="toc-text">用sys去找bug</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">4.</span> <span class="toc-text">结果</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B1%80%E9%99%90%E6%80%A7"><span class="toc-number">5.</span> <span class="toc-text">局限性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">相关工作</span></a></li></ol>
+		</div>
+		
+		<blockquote>
+<p>今天分享的Usenix 2020的Sys: a Static/Symbolic Tool for Finding Good Bugs in Good (Browser) Code这篇论文。这篇论文的作者也是KLEE这个很牛逼工具的作者。<br>目前该论文的工具已开源在github上：<a target="_blank" rel="noopener" href="https://github.com/PLSysSec/sys">https://github.com/PLSysSec/sys</a><br>在网上也看到大佬写的关于这篇论文的阅读报告（写的比我详细）：<a target="_blank" rel="noopener" href="https://ycdxsb.cn/bc8e474f.html">https://ycdxsb.cn/bc8e474f.html</a></p>
+</blockquote>
+<p>@[toc]</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>sys是一个针对很大代码量的自动找安全漏洞的静态分析工具。Sys使用两个技巧去找漏洞。首先，将几千万的系统代码分成小片段。然后使用静态checker去快速找到和标记潜在漏洞。接着，使用符号执行去检测这些潜在的漏洞是否是真实的bug。整个checker和系统只有6000行代码。Sys是灵活的，因为用户可以利用领域特定或系统特定的知识来检测出错误，并且降低误报。Sys在经过很好的检测的代码中找到了许多安全漏洞（51bug，43确定）。有趣的是，找到了一个可利用的浏览器的CVE漏洞，在7小时内被修复了。还挖到了Firefox和谷歌音频支持提供奖励的漏洞。</p>
+<h1 id="核心方法"><a href="#核心方法" class="headerlink" title="核心方法"></a>核心方法</h1><p>这篇论文的关键点其实就是静态分析结合符号执行，首先用LLVM生成程序的IR，然后生成控制流图。利用静态分析去找一堆潜在的漏洞，再用符号执行去过滤掉一些约束不正常的路径导致的漏洞。<br><img src="https://img-blog.csdnimg.cn/20201016165530430.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>找bug的三个步骤：</p>
+<ul>
+<li>静态地去检测源代码，并标记潜在的漏洞</li>
+<li>跳到每个标记的位置去符号化地检测</li>
+<li>推断sys错过的状态，因为sys跳过了部分代码</li>
+</ul>
+<p><strong>static</strong>:</p>
+<p>客户端写小的静态扩展，类似checker去识别源码里的模式，从而迅速扫过所有检测的代码并且标记潜在的错误位置。sys像其他工具差不多，首先也是从LLVM 的IR层构建控制流图，然后基于用户写的扩展做一个简单的流敏感的遍历。扩展是用Haskell写的，并且使用一个built-in routine的库来分析控制流图。如果一个给定漏洞的checker已经存在了，用户就可以直接用。</p>
+<p>figure3是个checker，主要是去找内存操作malloc(x)和索引操作memset(y)中x与y的关系。也许并不知道x，y的值，但是直到他们的关系可以找到bug。大部分这种例子并不是bug，所以后续才需要符号检测来确定是还是不是。5-7行的条件会去匹配分配的调用然后存储对象名字及分配大小之间的联系。然后11行再去匹配任何算术指令。然后去追踪指令间变量的依赖。当匹配到索引操作时（17行），就会标记索引大小和对象分配大小有依赖关系的路径。</p>
+<p><img src="https://img-blog.csdnimg.cn/20201016165433560.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>symbolic：</p>
+<ul>
+<li>自动化地符号执行整条路径。</li>
+<li>应用用户的符号checker到路径上</li>
+</ul>
+<p>符号执行是针对IR层做的。</p>
+<p>由于是针对浏览器这种百万级的代码，sys可以跳过一些代码，这是sys的弱点也是有点。跳过代码的同时也跳过了代码的约束，包括内存分配及内存初始化。因此有两个问题需要解决：</p>
+<ul>
+<li>如何对跳过的状态做个假的复制品</li>
+<li>确保跳过的约束不会导致假阳性增多。</li>
+</ul>
+<p>sys采用懒惰分配的策略来构成状态。如果检测的代码解引用了一个符号化的地址，sys就会为其分配内存，并继续执行。这种方法允许sys去自动分配路径需要的地址，而不需要用户干预。然而，允许构造虚假对象可能会导致假阳性，因为产生了不可能的路径和值。sys不会造成假阳性有四个理由：</p>
+<ol>
+<li>sys的约束求解器消除了所有有内部矛盾的路径（比如，一条需要指针为null和non-null的路径），唯一的假阳性是因为外部环境（caller）</li>
+<li>我们用sys针对特定的错误，而不是全部函数的正确性。</li>
+<li>可以以一种很方便的形式找到未定义的状态。</li>
+<li>大部分的假阳性通常是共享一个根源，然后sys checker就可以去解决由ad hoc和checker-specific trick导致的。</li>
+</ol>
+<h1 id="用sys去找bug"><a href="#用sys去找bug" class="headerlink" title="用sys去找bug"></a>用sys去找bug</h1><p>sys实际上主要针对两种漏洞，未初始化使用和越界读写。论文的这部分介绍了怎么用他工具去找漏洞，感兴趣的可以去看看。俺看是用Haskell这种语言弄的，暂时就先放放。</p>
+<h1 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h1><p>一般工具都会去看看能不能找到已经发现的漏洞，这个就比较牛逼，直接发现了真实的漏洞，还薅了谷歌一大笔钱。<br><img src="https://img-blog.csdnimg.cn/20201016165955868.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>同时还和别的工具做了一下对比。<br><img src="https://img-blog.csdnimg.cn/20201016170108178.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>最后还说了一下这工具的可用性。只要写这么点代码就能检测漏洞了。<br><img src="https://img-blog.csdnimg.cn/20201016170138500.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="局限性"><a href="#局限性" class="headerlink" title="局限性"></a>局限性</h1><p>sys能够跳过代码，所以不是很耗时的。他不能证明漏洞的存在，而且可能会丢失掉漏洞，因为假阳性的抑制、求解的时间限制、循环边界、偏移边界的设置和检测窗口的大小。</p>
+<p>局限性在于牺牲了准确性，从而能够检测浏览器的大型代码。</p>
+<p>仍然会产生错误报告。其中一半是由于未知的检测函数的caller invariants。</p>
+<p>在LLVM IR层做的，因此，开发者必须要能够编译他们的代码来使用。（相比之下，joern真的是非常的amazing！）</p>
+<h1 id="相关工作"><a href="#相关工作" class="headerlink" title="相关工作"></a>相关工作</h1><p>列了特别多的相关工作，主要包含以下这些部分：</p>
+<ul>
+<li><p>灵活的符号检测</p>
+</li>
+<li><p>结合符号执行和静态分析的工作</p>
+</li>
+<li><p>不完整的符号执行</p>
+</li>
+<li><p>结合具体执行和符号执行</p>
+</li>
+<li><p>模糊测试和符号执行</p>
+</li>
+<li><p>可扩展的静态检测</p>
+</li>
+<li><p>内存安全bug检测器</p>
+</li>
+<li><p>缓解内存安全bug</p>
+</li>
+</ul>
+<p>我对其中的结合符号执行和静态分析的工作比较感兴趣。下面简单翻译一下论文里是咋说的。</p>
+<p>最相关的是woodpecker[^1]这个工作，就是通过跳过一些路径来加速符号执行的速度。然而，即使是跳过路径有帮助，但是woodpecker仍然需要从main开始找到一条完整的路径。这个问题对他们来说不重要，因为他们要检测的程序的代码量要远小于浏览器。Dowser[^2]系统通过结合模糊测试，程序分析和符号执行去找到缓冲区溢出漏洞。它通过静态分析去识别复杂的程序片段，然后用其结合符号执行和模糊测试去控制程序到目标行数。Deadline [^3]通过静态分析过滤到不感兴趣的路径，然后用符号执行去针对包含多次读的路径，找到了内核的double fetch 漏洞。Gadleha[^4]实现了一个Clang的静态分析器，通过对导致bug的路径约束进行编码，如果不满足约束条件，将会减少bug的报告。Parvez[^5]用静态分析去识别潜在的有漏洞的语句，然后使用符号执行去生成测试样例去验证。</p>
+<p>其他的工作是结合静态分析和符号执行去复现bug。Zamfir[^6]以bug报告为输入，使用静态分析和符号执行去重现漏洞。Chopper[^7]用静态分析去去除掉程序中不感兴趣的部分（怎么定义不感兴趣？），从而减少后续符号执行的时间。其他的工作[^8][^9][^10][^11][^12][^13][^14][^15][^16][^17][^18][^19]都是结合静态分析和符号执行去来测试、验证以及找bug（从内存泄露到UAF，再到缓冲区溢出）所有的这些方法都说明了符号执行结合静态分析的能力。然而，目前还没有工作是像sys用无约束的符号执行去扩展到很大的代码量上的程序。</p>
+<p>[^1]: H. Cui, G. Hu, J. Wu, and J. Yang. Verifying systems rules using rule-directed symbolic execution. In ASPLOS, 2013<br>[^2]: I. Haller, A. Slowinska, M. Neugschwandtner, and H. Bos. Dowser: a guided fuzzer to find buffer overflow vulnerabilities. In USENIX Sec 2013.<br>[^3]: M. Xu, C. Qian, K. Lu, M. Backes, and T. Kim. Precise and scalable detection of double-fetch bugs in OS kernels. In IEEE S&amp;P, 2018<br>[^4]: M. R. Gadelha, E. Steffinlongo, L. C. Cordeiro, B. Fischer, and D. A. Nicole. SMT-based refutation of spurious bug reports in the Clang static analyzer. arXiv:1810.12041, 2018<br>[^5]: R. Parvez, P. A. Ward, and V. Ganesh. Combining static analysis and targeted symbolic execution for scalable bug-finding in application binaries. In CASCON, 2016<br>[^6]: S. Bucur, V. Ureche, C. Zamfir, and G. Candea. Parallel symbolic execution for automated real-world software testing. In EuroSys, 2011.<br>[^7]: D. Trabish, A. Mattavelli, N. Rinetzky, and C. Cadar. Chopped symbolic execution. In ICSE, 2018.<br>[^8]: J.-J. Bai, J. Lawall, Q.-L. Chen, and S.-M. Hu. Effective static analysis of concurrency use-after-free bugs in Linux device drivers.In USENIX ATC, 2019<br>[^9]: J. Feist, L. Mounier, S. Bardin, R. David, and M.-L. Potet. Finding the needle in the heap: combining static analysis and dynamic symbolic execution to trigger use-after-free. In SSPREW, 2016.<br>[^10]: A. Y. Gerasimov. Directed dynamic symbolic execution for static analysis warnings confirmation. Programming and Computer Software, 44(5), 2018<br>[^11]: S. Guo, M. Kusano, and C. Wang. Conc-iSE: Incremental symbolic execution of concurrent software. In ASE, 2016.<br>[^12]: S. Guo, M. Kusano, C. Wang, Z. Yang, and A. Gupta. Assertion guided symbolic execution of multithreaded programs. In FSE, 2015<br>[^13]: K. Li. Combining Static and Dynamic Analysis for Bug Detection and Program Understanding. PhD thesis, UMass Amherst, 2016.<br>[^14]: S. Person, G. Yang, N. Rungta, and S. Khurshid. Directed incremental symbolic execution. In PLDI, 2011<br>[^15]: M. J. Renzelmann, A. Kadav, and M. M. Swift. Symdrive: Testing drivers without devices. In OSDI, 2012.<br>[^16]: N. Rungta, S. Person, and J. Branchaud. A change impact analysis to characterize evolving program behaviors. In ICSM, 2012.<br>[^17]: Y. Shoshitaishvili, R. Wang, C. Hauser, C. Kruegel, and G. Vigna. Firmalice: Automatic detection of authentication bypass vulnerabilities in binary firmware. In NDSS, 2015.<br>[^18]: G. Yang, S. Khurshid, S. Person, and N. Rungta. Property differencing for incremental checking. In ICSE, 2014.<br>[^19]: Y. Zhang, Z. Chen, J. Wang, W. Dong, and Z. Liu. Regular property guided dynamic symbolic execution. In ICSE, 2015.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://example.com/2020/11/05/%E3%80%90%E8%AE%BA%E6%96%87%E5%88%86%E4%BA%AB%E3%80%91Sys_%20a%20Static_Symbolic%20Tool%20for%20Finding%20Good%20Bugs%20in%20Good%20(Browser)%20Code/" data-title="Hexo" data-tsina="" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/iskindar.github.io/2020/11/05/【论文分享】Automatic Generation of Data-Oriented Exploits/" title="">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  (no title)</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing MAYHEM on Binary Code/"  title="">
+ <strong>NEXT:</strong><br/> 
+ <span>(no title)
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">核心方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%A8sys%E5%8E%BB%E6%89%BEbug"><span class="toc-number">3.</span> <span class="toc-text">用sys去找bug</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">4.</span> <span class="toc-text">结果</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B1%80%E9%99%90%E6%80%A7"><span class="toc-number">5.</span> <span class="toc-text">局限性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">相关工作</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2020 
+		
+		<a href="http://example.com" target="_blank" title="John Doe">John Doe</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/iskindar.github.io/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>

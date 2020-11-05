@@ -4,15 +4,13 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>Hexo</title>
+    <title>【论文分享】Unleashing MAYHEM on Binary Code | Hexo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
     
     <meta name="author" content="John Doe">
     
-    <meta name="description" content="论文题目：Unleashing MAYHEM on Binary Code
-
-@[toc]
-简介：提出了mayhem系统，能够自动化地在二进制程序中找到可利用的漏洞。mayhem报告出的漏洞都会附带一个获取shell的exp。Mayhem工作在二进制程序上，而不需要debug信息。为了能够在二进制级">
+    <meta name="description" content="&amp;gt; 论文题目：Unleashing MAYHEM on Binary Code
+简介：提出了mayhem系统，能够自动化地在二进制程序中找到可利用的漏洞。mayhem报告出的漏洞都会附带一个获取shell的exp。Mayhem工作在二进制程序上，而不需要debug信息。为了能够在二进制级别实现">
     
     
     
@@ -70,15 +68,15 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing MAYHEM on Binary Code/" title="" itemprop="url"></a>
+      <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing-MAYHEM-on-Binary-Code/" title="【论文分享】Unleashing MAYHEM on Binary Code" itemprop="url">【论文分享】Unleashing MAYHEM on Binary Code</a>
   </h1>
   <p class="article-author">By
     
       <a href="http://example.com" title="John Doe">John Doe</a>
     </p>
   <p class="article-time">
-    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
-    Updated:<time datetime="2020-11-05T11:29:20.577Z" itemprop="dateModified">2020-11-05</time>
+    <time datetime="2020-11-05T11:40:59.000Z" itemprop="datePublished">2020-11-05</time>
+    Updated:<time datetime="2020-11-05T11:41:14.648Z" itemprop="dateModified">2020-11-05</time>
     
   </p>
 </header>
@@ -90,10 +88,7 @@
 		<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">简介：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E6%84%8F%E4%B9%89"><span class="toc-number">2.1.</span> <span class="toc-text">研究意义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%91%E6%88%98"><span class="toc-number">2.2.</span> <span class="toc-text">挑战</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B4%A1%E7%8C%AE"><span class="toc-number">2.3.</span> <span class="toc-text">贡献</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">5.</span> <span class="toc-text">结果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%89%E6%95%88%E6%80%A7"><span class="toc-number">5.1.</span> <span class="toc-text">有效性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7"><span class="toc-number">5.2.</span> <span class="toc-text">可扩展性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9C%9F%E5%AE%9E%E5%BA%94%E7%94%A8%E4%B8%AD%E7%9A%84%E7%AC%A6%E5%8F%B7%E5%86%85%E5%AD%98%E9%97%AE%E9%A2%98"><span class="toc-number">5.3.</span> <span class="toc-text">真实应用中的符号内存问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A6%86%E7%9B%96%E7%8E%87"><span class="toc-number">5.4.</span> <span class="toc-text">覆盖率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%92%8CAEG%E7%9A%84%E6%AF%94%E8%BE%83"><span class="toc-number">5.5.</span> <span class="toc-text">和AEG的比较</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">相关工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A8%E8%AE%BA"><span class="toc-number">7.</span> <span class="toc-text">讨论</span></a></li></ol>
 		</div>
 		
-		<blockquote>
-<p>论文题目：Unleashing MAYHEM on Binary Code</p>
-</blockquote>
-<p>@[toc]</p>
+		<p>﻿&gt; 论文题目：Unleashing MAYHEM on Binary Code</p>
 <h3 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h3><p>提出了mayhem系统，能够自动化地在二进制程序中找到可利用的漏洞。mayhem报告出的漏洞都会附带一个获取shell的exp。Mayhem工作在二进制程序上，而不需要debug信息。为了能够在二进制级别实现自动化利用，mayhem解决了两个挑战：一是，管理执行路径而不需要耗尽内存，二是推断符号化内存标记。为了解决这两个问题，提出了两种方法：混合符号执行，基于索引的内存建模。结果：使用mayhem找到了29可利用的漏洞，其中两个还是未被记录的。</p>
 <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><h4 id="研究意义"><a href="#研究意义" class="headerlink" title="研究意义"></a>研究意义</h4><p>bug数量很多，但能被攻击者利用的bug才是重要的，并且需要马上修复。因此，核心问题不是一个程序是否有bug，而是其bug是否可利用。mayhem通过为符号执行添加约束条件，在潜在的漏洞点找到一条可利用的路径。约束条件包括以下细节：</p>
 <ul>
@@ -195,7 +190,7 @@
 
 <div class="article-share" id="share">
 
-  <div data-url="http://example.com/2020/11/05/%E3%80%90%E8%AE%BA%E6%96%87%E5%88%86%E4%BA%AB%E3%80%91Unleashing%20MAYHEM%20on%20Binary%20Code/" data-title="Hexo" data-tsina="" class="share clearfix">
+  <div data-url="http://example.com/2020/11/05/%E3%80%90%E8%AE%BA%E6%96%87%E5%88%86%E4%BA%AB%E3%80%91Unleashing-MAYHEM-on-Binary-Code/" data-title="【论文分享】Unleashing MAYHEM on Binary Code | Hexo" data-tsina="" class="share clearfix">
   </div>
 
 </div>
@@ -204,19 +199,11 @@
 	
 <nav class="article-nav clearfix">
  
- <div class="prev" >
- <a href="/iskindar.github.io/2020/11/05/【论文分享】Automatic Generation of Data-Oriented Exploits/" title="">
-  <strong>PREVIOUS:</strong><br/>
-  <span>
-  (no title)</span>
-</a>
-</div>
-
 
 <div class="next">
-<a href="/iskindar.github.io/2020/11/05/【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code/"  title="">
+<a href="/iskindar.github.io/2020/11/05/【论文分享】Sys-a-Static-Symbolic-Tool-for-Finding-Good-Bugs-in-Good-Browser-Code/"  title="【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code">
  <strong>NEXT:</strong><br/> 
- <span>(no title)
+ <span>【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code
 </span>
 </a>
 </div>

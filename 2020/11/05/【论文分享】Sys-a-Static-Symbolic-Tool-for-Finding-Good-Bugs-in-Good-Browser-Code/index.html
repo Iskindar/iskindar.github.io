@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>Hexo</title>
+    <title>【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code | Hexo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
     
     <meta name="author" content="John Doe">
@@ -67,15 +67,15 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/iskindar.github.io/2020/11/05/【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code/" title="" itemprop="url"></a>
+      <a href="/iskindar.github.io/2020/11/05/【论文分享】Sys-a-Static-Symbolic-Tool-for-Finding-Good-Bugs-in-Good-Browser-Code/" title="【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code" itemprop="url">【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code</a>
   </h1>
   <p class="article-author">By
     
       <a href="http://example.com" title="John Doe">John Doe</a>
     </p>
   <p class="article-time">
-    <time datetime="2020-11-05T11:30:13.744Z" itemprop="datePublished">2020-11-05</time>
-    Updated:<time datetime="2020-11-05T11:29:52.573Z" itemprop="dateModified">2020-11-05</time>
+    <time datetime="2020-11-05T11:40:16.000Z" itemprop="datePublished">2020-11-05</time>
+    Updated:<time datetime="2020-11-05T11:40:37.999Z" itemprop="dateModified">2020-11-05</time>
     
   </p>
 </header>
@@ -87,10 +87,10 @@
 		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">核心方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%94%A8sys%E5%8E%BB%E6%89%BEbug"><span class="toc-number">3.</span> <span class="toc-text">用sys去找bug</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">4.</span> <span class="toc-text">结果</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B1%80%E9%99%90%E6%80%A7"><span class="toc-number">5.</span> <span class="toc-text">局限性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="toc-number">6.</span> <span class="toc-text">相关工作</span></a></li></ol>
 		</div>
 		
-		<blockquote>
+		<p>﻿</p>
+<blockquote>
 <p>今天分享的Usenix 2020的Sys: a Static/Symbolic Tool for Finding Good Bugs in Good (Browser) Code这篇论文。这篇论文的作者也是KLEE这个很牛逼工具的作者。<br>目前该论文的工具已开源在github上：<a target="_blank" rel="noopener" href="https://github.com/PLSysSec/sys">https://github.com/PLSysSec/sys</a><br>在网上也看到大佬写的关于这篇论文的阅读报告（写的比我详细）：<a target="_blank" rel="noopener" href="https://ycdxsb.cn/bc8e474f.html">https://ycdxsb.cn/bc8e474f.html</a></p>
 </blockquote>
-<p>@[toc]</p>
 <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>sys是一个针对很大代码量的自动找安全漏洞的静态分析工具。Sys使用两个技巧去找漏洞。首先，将几千万的系统代码分成小片段。然后使用静态checker去快速找到和标记潜在漏洞。接着，使用符号执行去检测这些潜在的漏洞是否是真实的bug。整个checker和系统只有6000行代码。Sys是灵活的，因为用户可以利用领域特定或系统特定的知识来检测出错误，并且降低误报。Sys在经过很好的检测的代码中找到了许多安全漏洞（51bug，43确定）。有趣的是，找到了一个可利用的浏览器的CVE漏洞，在7小时内被修复了。还挖到了Firefox和谷歌音频支持提供奖励的漏洞。</p>
 <h1 id="核心方法"><a href="#核心方法" class="headerlink" title="核心方法"></a>核心方法</h1><p>这篇论文的关键点其实就是静态分析结合符号执行，首先用LLVM生成程序的IR，然后生成控制流图。利用静态分析去找一堆潜在的漏洞，再用符号执行去过滤掉一些约束不正常的路径导致的漏洞。<br><img src="https://img-blog.csdnimg.cn/20201016165530430.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTM2NDgwNjM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 <p>找bug的三个步骤：</p>
@@ -159,7 +159,7 @@
 
 <div class="article-share" id="share">
 
-  <div data-url="http://example.com/2020/11/05/%E3%80%90%E8%AE%BA%E6%96%87%E5%88%86%E4%BA%AB%E3%80%91Sys_%20a%20Static_Symbolic%20Tool%20for%20Finding%20Good%20Bugs%20in%20Good%20(Browser)%20Code/" data-title="Hexo" data-tsina="" class="share clearfix">
+  <div data-url="http://example.com/2020/11/05/%E3%80%90%E8%AE%BA%E6%96%87%E5%88%86%E4%BA%AB%E3%80%91Sys-a-Static-Symbolic-Tool-for-Finding-Good-Bugs-in-Good-Browser-Code/" data-title="【论文分享】Sys_ a Static_Symbolic Tool for Finding Good Bugs in Good (Browser) Code | Hexo" data-tsina="" class="share clearfix">
   </div>
 
 </div>
@@ -169,18 +169,18 @@
 <nav class="article-nav clearfix">
  
  <div class="prev" >
- <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing MAYHEM on Binary Code/" title="">
+ <a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing-MAYHEM-on-Binary-Code/" title="【论文分享】Unleashing MAYHEM on Binary Code">
   <strong>PREVIOUS:</strong><br/>
   <span>
-  (no title)</span>
+  【论文分享】Unleashing MAYHEM on Binary Code</span>
 </a>
 </div>
 
 
 <div class="next">
-<a href="/iskindar.github.io/2020/11/05/【论文分享】Unleashing Use-Before-Initialization Vulnerabilities in the Linux Kernel Using Targeted Stack/"  title="">
+<a href="/iskindar.github.io/2020/11/05/【论文分享】Automatic-Generation-of-Data-Oriented-Exploits/"  title="【论文分享】Automatic Generation of Data-Oriented Exploits">
  <strong>NEXT:</strong><br/> 
- <span>(no title)
+ <span>【论文分享】Automatic Generation of Data-Oriented Exploits
 </span>
 </a>
 </div>
